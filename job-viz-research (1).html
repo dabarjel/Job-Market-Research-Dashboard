@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Market Data Viz — UX Research Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #252a35;
+    --accent1: #e8ff47;
+    --accent2: #47c8ff;
+    --accent3: #ff6b6b;
+    --accent4: #b47fff;
+    --accent5: #47ffb4;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    padding: 48px 60px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(232,255,71,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .header-left h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 10px;
+  }
+  .header-left h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .header-left h2 em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+  .header-meta {
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* NAV TABS */
+  nav {
+    padding: 0 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  nav button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav button:hover { color: var(--text-dim); }
+  nav button.active {
+    color: var(--accent1);
+    border-bottom-color: var(--accent1);
+  }
+
+  /* MAIN */
+  main { padding: 48px 60px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 600px;
+    margin-bottom: 36px;
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* DATA TYPE CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    border: 1px solid;
+  }
+  .chip-quant { background: rgba(71,200,255,0.08); border-color: rgba(71,200,255,0.3); color: var(--accent2); }
+  .chip-qual  { background: rgba(180,127,255,0.08); border-color: rgba(180,127,255,0.3); color: var(--accent4); }
+  .chip-struct{ background: rgba(232,255,71,0.08); border-color: rgba(232,255,71,0.3); color: var(--accent1); }
+  .chip-time  { background: rgba(71,255,180,0.08); border-color: rgba(71,255,180,0.3); color: var(--accent5); }
+  .chip-nom   { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.3); color: var(--accent3); }
+
+  /* ============ TAB 1: DATA TYPES ============ */
+  .dtype-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+  .dtype-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .dtype-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .dtype-card.active-card { border-color: var(--accent1); }
+  .dtype-icon {
+    width: 36px; height: 36px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .dtype-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .dtype-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+  .dtype-tag {
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Mapping panel */
+  .mapping-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  .mapping-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mapping-row:last-child { border-bottom: none; }
+  .mapping-dtype {
+    width: 160px;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .mapping-arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+  .mapping-vizzes { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .mapping-viz {
+    padding: 4px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .mapping-viz:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .mapping-job-context {
+    width: 180px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ============ TAB 2: VIZ LIBRARY ============ */
+  .viz-filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--text-dim); color: var(--text); }
+  .filter-btn.active { background: var(--accent1); color: #0a0b0f; border-color: var(--accent1); }
+  .viz-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .viz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .viz-card:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .viz-preview {
+    height: 160px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .viz-info { padding: 18px 20px; }
+  .viz-info-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .viz-info-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
+  .viz-best-for {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .viz-best-for strong { color: var(--accent5); }
+
+  /* ============ SVG PREVIEWS ============ */
+  svg text { font-family: 'DM Mono', monospace; }
+
+  /* ============ TAB 3: JOB TRACKER MOCKUPS ============ */
+  .mockup-section { margin-bottom: 48px; }
+  .mockup-section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .mockup-section p { font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
+
+  /* Ranked list with movement */
+  .ranked-list { display: flex; flex-direction: column; gap: 3px; }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .rank-item:hover { border-color: rgba(255,255,255,0.15); }
+  .rank-num {
+    width: 28px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .rank-delta {
+    width: 32px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .rank-delta.up { color: var(--accent5); }
+  .rank-delta.down { color: var(--accent3); }
+  .rank-delta.new { color: var(--accent1); font-size: 9px; }
+  .rank-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .rank-bar-wrap {
+    width: 120px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .rank-bar { height: 100%; border-radius: 2px; background: var(--accent2); }
+  .rank-count { width: 60px; text-align: right; font-size: 11px; color: var(--text-muted); }
+  .rank-trend { width: 50px; }
+
+  /* Sparkline */
+  .sparkline { display: inline-block; vertical-align: middle; }
+
+  /* Sankey mockup */
+  .sankey-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  /* Emerging roles */
+  .emerging-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .emerging-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .emerging-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .emerging-card.hot::before { background: var(--accent3); }
+  .emerging-card.rising::before { background: var(--accent5); }
+  .emerging-card.new::before { background: var(--accent1); }
+  .emerging-card.shifting::before { background: var(--accent2); }
+  .emerging-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+  .emerging-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .emerging-growth { font-size: 20px; font-weight: 500; font-family: 'Syne', sans-serif; margin-bottom: 8px; }
+  .emerging-platforms { display: flex; gap: 4px; flex-wrap: wrap; }
+  .platform-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
+
+  /* ============ TAB 4: ROLE SIMILARITY ============ */
+  .similarity-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .sim-cluster {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .sim-cluster-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sim-role {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sim-role:last-child { border-bottom: none; }
+  .sim-role-name { flex: 1; font-size: 12px; }
+  .sim-score-bar {
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .sim-score-fill { height: 100%; border-radius: 2px; }
+  .sim-score-val { font-size: 11px; color: var(--text-muted); width: 36px; text-align: right; }
+  .sim-canonical {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.2);
+    border-radius: 3px;
+    font-size: 9px;
+    color: var(--accent1);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ============ UTILITY ============ */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  .badge-new {
+    display: inline-flex; align-items: center;
+    padding: 2px 7px;
+    background: rgba(232,255,71,0.12);
+    border: 1px solid rgba(232,255,71,0.25);
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--accent1);
+    letter-spacing: 0.1em;
+  }
+  .badge-shift {
+    display: inline-flex; align-items: center;
+    padding: 2px 7px;
+    background: rgba(71,200,255,0.1);
+    border: 1px solid rgba(71,200,255,0.2);
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+  }
+  .note-box {
+    background: rgba(232,255,71,0.04);
+    border: 1px solid rgba(232,255,71,0.12);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-top: 16px;
+  }
+  .note-box strong { color: var(--accent1); }
+
+  /* ============ EDIT MODE ============ */
+  #edit-bar {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  #edit-bar .eb-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .eb-btn {
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .eb-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .eb-btn.primary {
+    background: var(--accent1);
+    color: #0a0b0f;
+    border-color: var(--accent1);
+    font-weight: 600;
+  }
+  .eb-btn.primary:hover { background: #d4eb30; }
+  .eb-btn.danger { border-color: rgba(255,107,107,0.3); color: var(--accent3); }
+  .eb-btn.danger:hover { background: rgba(255,107,107,0.1); }
+
+  /* Editable elements in edit mode */
+  body.edit-mode [data-editable] {
+    outline: 1px dashed rgba(232,255,71,0.25);
+    border-radius: 3px;
+    cursor: text;
+    transition: outline 0.15s;
+  }
+  body.edit-mode [data-editable]:hover {
+    outline: 1px solid rgba(232,255,71,0.6);
+    background: rgba(232,255,71,0.04);
+  }
+  body.edit-mode [data-editable]:focus {
+    outline: 2px solid var(--accent1);
+    background: rgba(232,255,71,0.06);
+  }
+  body.edit-mode .deletable {
+    position: relative;
+  }
+  body.edit-mode .deletable:hover::after {
+    content: '✕ remove';
+    position: absolute;
+    top: 6px; right: 8px;
+    background: rgba(255,107,107,0.15);
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--accent3);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    pointer-events: none;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+  .delete-btn {
+    display: none;
+    position: absolute;
+    top: 6px; right: 8px;
+    background: rgba(255,107,107,0.15);
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--accent3);
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    z-index: 10;
+  }
+  body.edit-mode .deletable:hover .delete-btn { display: block; }
+  .add-row-btn {
+    display: none;
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    background: none;
+    border: 1px dashed rgba(232,255,71,0.2);
+    border-radius: 6px;
+    color: rgba(232,255,71,0.5);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.1em;
+  }
+  body.edit-mode .add-row-btn { display: block; }
+  .add-row-btn:hover {
+    border-color: var(--accent1);
+    color: var(--accent1);
+    background: rgba(232,255,71,0.04);
+  }
+  #edit-hint {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(232,255,71,0.1);
+    border: 1px solid rgba(232,255,71,0.25);
+    color: var(--accent1);
+    font-size: 10px;
+    padding: 7px 18px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    z-index: 999;
+    pointer-events: none;
+  }
+  body.edit-mode #edit-hint { display: block; }
+
+  /* Modal */
+  #add-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+  #add-modal.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    width: 420px;
+    max-width: 90vw;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .modal-box h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--accent1);
+  }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .modal-field input, .modal-field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .modal-field input:focus, .modal-field select:focus { border-color: var(--accent1); }
+  .modal-field select option { background: var(--surface2); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- Edit hint -->
+<div id="edit-hint">✎ EDIT MODE — click any text to edit · hover rows to delete</div>
+
+<!-- Edit bar -->
+<div id="edit-bar">
+  <span class="eb-label">Dashboard</span>
+  <button class="eb-btn primary" id="toggle-edit-btn" onclick="toggleEditMode()">✎ Edit</button>
+  <button class="eb-btn" id="export-btn" onclick="exportJSON()" style="display:none">↓ Export</button>
+  <button class="eb-btn" id="import-btn-show" onclick="document.getElementById('import-input').click()" style="display:none">↑ Import</button>
+  <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(event)">
+  <button class="eb-btn danger" id="reset-btn" onclick="resetAll()" style="display:none">↺ Reset</button>
+</div>
+
+<!-- Add item modal -->
+<div id="add-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Add Item</h3>
+    <div id="modal-fields"></div>
+    <div class="modal-actions">
+      <button class="eb-btn" onclick="closeModal()">Cancel</button>
+      <button class="eb-btn primary" onclick="submitModal()">Add</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="header-left">
+    <h1 data-editable contenteditable="false">UX Research — Data Visualization Reference</h1>
+    <h2><span data-editable contenteditable="false">Job Market</span><br><em data-editable contenteditable="false">Tracking System</em></h2>
+  </div>
+  <div class="header-meta">
+    <div>Research Phase: Data Viz Mapping</div>
+    <div>Project: Role Intelligence Platform</div>
+    <div style="margin-top:8px; color: var(--accent1);">8 data types · 20+ viz patterns</div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('data-types')">01 · Data Type Map</button>
+  <button onclick="showTab('viz-library')">02 · Viz Library</button>
+  <button onclick="showTab('mockups')">03 · Component Mockups</button>
+  <button onclick="showTab('roles')">04 · Role Similarity</button>
+</nav>
+
+<main>
+
+  <!-- ======== TAB 1: DATA TYPES ======== -->
+  <div id="data-types" class="tab-content active">
+    <div class="section-label">Step 1 — Classify</div>
+    <div class="section-title">Data Types in Your System</div>
+    <div class="section-desc">Each type of data your platform collects maps to specific visualization strategies. Understanding which bucket your data falls into determines the right chart pattern.</div>
+
+    <div class="dtype-grid">
+      <div class="dtype-card">
+        <div class="dtype-tag">Descriptive</div>
+        <div class="dtype-icon" style="background:rgba(180,127,255,0.12); color: var(--accent4);">🏷</div>
+        <div class="dtype-name">Qualitative</div>
+        <div class="dtype-desc">Job titles, skill names, company names, industry categories. Non-numeric — describes characteristics of roles.</div>
+        <div class="chips">
+          <span class="chip chip-qual">Job Titles</span>
+          <span class="chip chip-qual">Skills</span>
+          <span class="chip chip-qual">Industries</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Numerical</div>
+        <div class="dtype-icon" style="background:rgba(71,200,255,0.12); color: var(--accent2);">📊</div>
+        <div class="dtype-name">Quantitative</div>
+        <div class="dtype-desc">Job posting counts, salary ranges, growth percentages, days a role has been listed. Expressed in numbers.</div>
+        <div class="chips">
+          <span class="chip chip-quant">Posting Count</span>
+          <span class="chip chip-quant">Salary</span>
+          <span class="chip chip-quant">Growth %</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Organized</div>
+        <div class="dtype-icon" style="background:rgba(232,255,71,0.12); color: var(--accent1);">📋</div>
+        <div class="dtype-name">Structured</div>
+        <div class="dtype-desc">Job board database records with consistent fields: title, company, location, salary, date posted. Easy to query.</div>
+        <div class="chips">
+          <span class="chip chip-struct">Job Records</span>
+          <span class="chip chip-struct">Platform Data</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Disorganized</div>
+        <div class="dtype-icon" style="background:rgba(255,107,107,0.12); color: var(--accent3);">📝</div>
+        <div class="dtype-name">Unstructured</div>
+        <div class="dtype-desc">Full job description text, recruiter emails, LinkedIn posts, company blog posts about hiring. Requires NLP processing.</div>
+        <div class="chips">
+          <span class="chip chip-nom">JD Text</span>
+          <span class="chip chip-nom">Reviews</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Partially Organized</div>
+        <div class="dtype-icon" style="background:rgba(71,255,180,0.12); color: var(--accent5);">🔀</div>
+        <div class="dtype-name">Semi-Structured</div>
+        <div class="dtype-desc">JSON from job APIs (LinkedIn, Indeed), XML feeds from ATS systems. Has schema but varies by source.</div>
+        <div class="chips">
+          <span class="chip chip-time">JSON APIs</span>
+          <span class="chip chip-time">XML Feeds</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Countable</div>
+        <div class="dtype-icon" style="background:rgba(71,200,255,0.12); color: var(--accent2);">🔢</div>
+        <div class="dtype-name">Discrete</div>
+        <div class="dtype-desc">Number of job postings, headcount needed, number of required skills. Whole numbers — can't have 2.5 openings.</div>
+        <div class="chips">
+          <span class="chip chip-quant">Openings</span>
+          <span class="chip chip-quant">Req. Skills</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Measurable</div>
+        <div class="dtype-icon" style="background:rgba(71,255,180,0.12); color: var(--accent5);">📈</div>
+        <div class="dtype-name">Continuous</div>
+        <div class="dtype-desc">Salary ranges, growth rate over time, skill demand trending. Can take any value within a range, changes gradually.</div>
+        <div class="chips">
+          <span class="chip chip-time">Salary Range</span>
+          <span class="chip chip-time">Growth Rate</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Categories</div>
+        <div class="dtype-icon" style="background:rgba(255,107,107,0.12); color: var(--accent3);">🏷</div>
+        <div class="dtype-name">Nominal</div>
+        <div class="dtype-desc">Platform source (LinkedIn vs. Indeed vs. Glassdoor), location type (Remote/Hybrid/On-site). No inherent ranking.</div>
+        <div class="chips">
+          <span class="chip chip-nom">Platform</span>
+          <span class="chip chip-nom">Work Type</span>
+        </div>
+      </div>
+      <div class="dtype-card">
+        <div class="dtype-tag">Ranked</div>
+        <div class="dtype-icon" style="background:rgba(180,127,255,0.12); color: var(--accent4);">🥇</div>
+        <div class="dtype-name">Ordinal</div>
+        <div class="dtype-desc">Seniority levels (Junior → Mid → Senior → Lead), demand ranking of skills. Order matters; exact gap between values doesn't.</div>
+        <div class="chips">
+          <span class="chip chip-qual">Seniority</span>
+          <span class="chip chip-qual">Skill Rank</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:40px">Step 2 — Mapping</div>
+    <div class="section-title" style="margin-bottom:6px">Data Type → Best Visualization</div>
+    <div class="section-desc">For each data type your job platform produces, here are the recommended visualization patterns — with job-specific context.</div>
+
+    <div class="mapping-panel">
+      <div class="mapping-row" style="border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:4px;">
+        <div class="mapping-dtype" style="color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">Data Type</div>
+        <div class="mapping-arrow" style="opacity:0"></div>
+        <div class="mapping-vizzes" style="color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; flex:1">Visualization Options</div>
+        <div class="mapping-job-context" style="color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;">Job Platform Context</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent4)">Qualitative</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Word Cloud</span>
+          <span class="mapping-viz">Tag Cluster</span>
+          <span class="mapping-viz">Network Graph</span>
+          <span class="mapping-viz">Ranked List</span>
+          <span class="mapping-viz">Treemap</span>
+        </div>
+        <div class="mapping-job-context">Skill tags, job title clusters, industry labels</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent2)">Quantitative</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Bar Chart</span>
+          <span class="mapping-viz">Line Chart</span>
+          <span class="mapping-viz">Area Chart</span>
+          <span class="mapping-viz">Heatmap</span>
+          <span class="mapping-viz">Scatter Plot</span>
+        </div>
+        <div class="mapping-job-context">Posting volume, salary distributions, growth %</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent5)">Time Series</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Line + Threshold</span>
+          <span class="mapping-viz">Sparkline</span>
+          <span class="mapping-viz">Bump Chart</span>
+          <span class="mapping-viz">Gantt View</span>
+          <span class="mapping-viz">Stream Graph</span>
+        </div>
+        <div class="mapping-job-context">Role demand over time, hiring spikes, seasonal patterns</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent3)">Flow / Change</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Sankey Diagram</span>
+          <span class="mapping-viz">Alluvial Chart</span>
+          <span class="mapping-viz">Chord Diagram</span>
+          <span class="mapping-viz">Flow Map</span>
+        </div>
+        <div class="mapping-job-context">Role evolution, skill transitions, title name changes</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent1)">Nominal</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Donut Chart</span>
+          <span class="mapping-viz">Grouped Bar</span>
+          <span class="mapping-viz">Icon Array</span>
+          <span class="mapping-viz">Venn Diagram</span>
+        </div>
+        <div class="mapping-job-context">Platform breakdown, work type split, location type</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent4)">Ordinal</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Ranked List + Δ</span>
+          <span class="mapping-viz">Slope Chart</span>
+          <span class="mapping-viz">Dot Plot</span>
+          <span class="mapping-viz">Lollipop</span>
+        </div>
+        <div class="mapping-job-context">Seniority levels, skill demand ranking with movement</div>
+      </div>
+
+      <div class="mapping-row">
+        <div class="mapping-dtype"><span style="color:var(--accent5)">Similarity</span></div>
+        <div class="mapping-arrow">→</div>
+        <div class="mapping-vizzes">
+          <span class="mapping-viz">Cluster Map</span>
+          <span class="mapping-viz">Venn / Overlap</span>
+          <span class="mapping-viz">Network Graph</span>
+          <span class="mapping-viz">Heatmap Matrix</span>
+        </div>
+        <div class="mapping-job-context">Same-role aliases, overlapping skill sets between titles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== TAB 2: VIZ LIBRARY ======== -->
+  <div id="viz-library" class="tab-content">
+    <div class="section-label">Step 2 — Reference</div>
+    <div class="section-title">Visualization Pattern Library</div>
+    <div class="section-desc">20 chart patterns researched for job market data. Each includes use case, strengths, and caveats for your specific platform.</div>
+
+    <div class="viz-filter-bar">
+      <button class="filter-btn active" onclick="filterViz('all', this)">All Patterns</button>
+      <button class="filter-btn" onclick="filterViz('change', this)">Change & Trends</button>
+      <button class="filter-btn" onclick="filterViz('comparison', this)">Comparison</button>
+      <button class="filter-btn" onclick="filterViz('flow', this)">Flow & Shift</button>
+      <button class="filter-btn" onclick="filterViz('distribution', this)">Distribution</button>
+      <button class="filter-btn" onclick="filterViz('relationship', this)">Relationships</button>
+    </div>
+
+    <div class="viz-grid" id="viz-grid">
+
+      <!-- LINE CHART -->
+      <div class="viz-card" data-cats="change">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <line x1="20" y1="10" x2="20" y2="100" stroke="#252a35" stroke-width="1"/>
+            <line x1="20" y1="100" x2="210" y2="100" stroke="#252a35" stroke-width="1"/>
+            <!-- threshold line -->
+            <line x1="20" y1="45" x2="210" y2="45" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+            <text x="212" y="48" fill="#ff6b6b" font-size="8" opacity="0.7">threshold</text>
+            <!-- data line -->
+            <polyline points="20,85 50,75 80,68 100,55 120,35 150,28 180,32 210,25"
+              fill="none" stroke="#47c8ff" stroke-width="2"/>
+            <circle cx="120" cy="35" r="3" fill="#e8ff47"/>
+            <text x="115" y="28" fill="#e8ff47" font-size="8">spike</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Line Chart + Threshold <span class="badge-new">TREND</span></div>
+          <div class="viz-info-desc">Plots job posting volume over time with a configurable threshold line that highlights sudden spikes or drops in demand.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Detecting hiring surges, identifying role decline. Works with continuous time-series data.</div>
+          <div class="chips"><span class="chip chip-time">Time Series</span><span class="chip chip-quant">Quantitative</span></div>
+        </div>
+      </div>
+
+      <!-- SANKEY -->
+      <div class="viz-card" data-cats="flow">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <!-- left nodes -->
+            <rect x="15" y="20" width="12" height="50" fill="#47c8ff" opacity="0.7" rx="2"/>
+            <rect x="15" y="78" width="12" height="25" fill="#b47fff" opacity="0.7" rx="2"/>
+            <!-- right nodes -->
+            <rect x="193" y="15" width="12" height="30" fill="#e8ff47" opacity="0.7" rx="2"/>
+            <rect x="193" y="52" width="12" height="28" fill="#47ffb4" opacity="0.7" rx="2"/>
+            <rect x="193" y="87" width="12" height="20" fill="#ff6b6b" opacity="0.7" rx="2"/>
+            <!-- flows -->
+            <path d="M27,20 C110,20 110,15 193,15 L193,45 C110,45 110,70 27,70 Z" fill="#47c8ff" opacity="0.2"/>
+            <path d="M27,20 C110,20 110,52 193,52 L193,80 C110,80 110,50 27,50 Z" fill="#47c8ff" opacity="0.15"/>
+            <path d="M27,78 C110,78 110,87 193,87 L193,107 C110,107 110,103 27,103 Z" fill="#b47fff" opacity="0.2"/>
+            <!-- labels -->
+            <text x="8" y="50" fill="#9ca3af" font-size="7" text-anchor="middle">Data</text>
+            <text x="8" y="93" fill="#9ca3af" font-size="7" text-anchor="middle">ML</text>
+            <text x="212" y="33" fill="#9ca3af" font-size="7">Analyst</text>
+            <text x="212" y="68" fill="#9ca3af" font-size="7">Scientist</text>
+            <text x="212" y="100" fill="#9ca3af" font-size="7">Engineer</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Sankey Diagram <span class="badge-shift">SHIFT</span></div>
+          <div class="viz-info-desc">Shows how roles or skills flow and transform over time. Ideal for showing how one job title category splits into multiple emerging roles.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Role evolution, title fragmentation, skill overlap between positions.</div>
+          <div class="chips"><span class="chip chip-qual">Qualitative</span><span class="chip chip-time">Flow</span></div>
+        </div>
+      </div>
+
+      <!-- RANKED LIST -->
+      <div class="viz-card" data-cats="comparison change">
+        <div class="viz-preview" style="padding: 12px;">
+          <div style="width:100%; display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#181c24;border-radius:4px;font-size:10px;">
+              <span style="color:#47ffb4;width:16px">▲4</span>
+              <span style="flex:1;color:#e8eaf0">AI Prompt Engineer</span>
+              <div style="width:60px;height:3px;background:#252a35;border-radius:2px;overflow:hidden"><div style="width:85%;height:100%;background:#47c8ff"></div></div>
+              <span style="color:#6b7280;width:30px;text-align:right">8.2k</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#181c24;border-radius:4px;font-size:10px;">
+              <span style="color:#e8ff47;width:16px;font-size:8px">NEW</span>
+              <span style="flex:1;color:#e8eaf0">LLM Ops Engineer</span>
+              <div style="width:60px;height:3px;background:#252a35;border-radius:2px;overflow:hidden"><div style="width:72%;height:100%;background:#47c8ff"></div></div>
+              <span style="color:#6b7280;width:30px;text-align:right">6.1k</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#181c24;border-radius:4px;font-size:10px;">
+              <span style="color:#ff6b6b;width:16px">▼2</span>
+              <span style="flex:1;color:#e8eaf0">Data Analyst</span>
+              <div style="width:60px;height:3px;background:#252a35;border-radius:2px;overflow:hidden"><div style="width:55%;height:100%;background:#47c8ff"></div></div>
+              <span style="color:#6b7280;width:30px;text-align:right">4.8k</span>
+            </div>
+          </div>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Ranked List + Movement Indicators</div>
+          <div class="viz-info-desc">Shows job roles ranked by volume, with delta indicators (▲▼ NEW) showing change from prior period. Scannable and action-oriented.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Weekly/monthly role demand snapshots. Users instantly see what's rising, falling, or brand new.</div>
+          <div class="chips"><span class="chip chip-qual">Ordinal</span><span class="chip chip-quant">Discrete</span></div>
+        </div>
+      </div>
+
+      <!-- HEATMAP -->
+      <div class="viz-card" data-cats="distribution comparison">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <g>
+              <!-- row labels -->
+              <text x="42" y="30" fill="#6b7280" font-size="8" text-anchor="end">Python</text>
+              <text x="42" y="50" fill="#6b7280" font-size="8" text-anchor="end">SQL</text>
+              <text x="42" y="70" fill="#6b7280" font-size="8" text-anchor="end">ML Ops</text>
+              <text x="42" y="90" fill="#6b7280" font-size="8" text-anchor="end">LLM</text>
+              <!-- col labels -->
+              <text x="58" y="15" fill="#6b7280" font-size="7" text-anchor="middle">Data Sci</text>
+              <text x="88" y="15" fill="#6b7280" font-size="7" text-anchor="middle">ML Eng</text>
+              <text x="118" y="15" fill="#6b7280" font-size="7" text-anchor="middle">AI Eng</text>
+              <text x="148" y="15" fill="#6b7280" font-size="7" text-anchor="middle">Analyst</text>
+              <!-- cells -->
+              <rect x="45" y="20" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.9"/>
+              <rect x="75" y="20" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.7"/>
+              <rect x="105" y="20" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.5"/>
+              <rect x="135" y="20" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.3"/>
+              <rect x="45" y="40" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.7"/>
+              <rect x="75" y="40" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.5"/>
+              <rect x="105" y="40" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.3"/>
+              <rect x="135" y="40" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.8"/>
+              <rect x="45" y="60" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.2"/>
+              <rect x="75" y="60" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.9"/>
+              <rect x="105" y="60" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.95"/>
+              <rect x="135" y="60" width="25" height="16" rx="2" fill="#47c8ff" opacity="0.1"/>
+              <rect x="45" y="80" width="25" height="16" rx="2" fill="#e8ff47" opacity="0.2"/>
+              <rect x="75" y="80" width="25" height="16" rx="2" fill="#e8ff47" opacity="0.5"/>
+              <rect x="105" y="80" width="25" height="16" rx="2" fill="#e8ff47" opacity="0.9"/>
+              <rect x="135" y="80" width="25" height="16" rx="2" fill="#e8ff47" opacity="0.15"/>
+            </g>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Heatmap Matrix</div>
+          <div class="viz-info-desc">Shows which skills appear most frequently across different job title categories. Color intensity = demand. Great for comparing skill overlap.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Skill-to-role mapping, identifying skill gaps, showing overlap between "similar" roles.</div>
+          <div class="chips"><span class="chip chip-quant">Quantitative</span><span class="chip chip-struct">Structured</span></div>
+        </div>
+      </div>
+
+      <!-- BUMP CHART -->
+      <div class="viz-card" data-cats="change comparison">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <line x1="40" y1="10" x2="40" y2="110" stroke="#252a35" stroke-width="1"/>
+            <line x1="100" y1="10" x2="100" y2="110" stroke="#252a35" stroke-width="1"/>
+            <line x1="160" y1="10" x2="160" y2="110" stroke="#252a35" stroke-width="1"/>
+            <line x1="210" y1="10" x2="210" y2="110" stroke="#252a35" stroke-width="1"/>
+            <text x="40" y="8" fill="#6b7280" font-size="7" text-anchor="middle">Q1</text>
+            <text x="100" y="8" fill="#6b7280" font-size="7" text-anchor="middle">Q2</text>
+            <text x="160" y="8" fill="#6b7280" font-size="7" text-anchor="middle">Q3</text>
+            <text x="210" y="8" fill="#6b7280" font-size="7" text-anchor="middle">Q4</text>
+            <!-- lines -->
+            <path d="M40,25 C70,25 70,30 100,30 C130,30 130,20 160,20 C185,20 185,17 210,17" fill="none" stroke="#47c8ff" stroke-width="2"/>
+            <path d="M40,45 C70,45 70,40 100,40 C130,40 130,50 160,50 C185,50 185,45 210,45" fill="none" stroke="#e8ff47" stroke-width="2"/>
+            <path d="M40,65 C70,65 70,80 100,80 C130,80 130,65 160,65 C185,65 185,70 210,70" fill="none" stroke="#b47fff" stroke-width="2"/>
+            <path d="M40,85 C70,85 70,70 100,60 C130,50 130,85 160,85 C185,85 185,90 210,90" fill="none" stroke="#47ffb4" stroke-width="2"/>
+            <!-- dots -->
+            <circle cx="40" cy="25" r="3" fill="#47c8ff"/>
+            <circle cx="210" cy="17" r="3" fill="#47c8ff"/>
+            <circle cx="40" cy="85" r="3" fill="#47ffb4"/>
+            <circle cx="210" cy="90" r="3" fill="#47ffb4"/>
+            <text x="215" y="20" fill="#47c8ff" font-size="8">#1</text>
+            <text x="215" y="48" fill="#e8ff47" font-size="8">#2</text>
+            <text x="215" y="73" fill="#b47fff" font-size="8">#3</text>
+            <text x="215" y="93" fill="#47ffb4" font-size="8">#4</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Bump Chart / Ranking Over Time</div>
+          <div class="viz-info-desc">Tracks how role rankings shift across time periods. Lines crossing each other visually communicate role overtaking — dramatic and readable.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Quarterly role demand rankings, which skills are gaining vs losing priority over time.</div>
+          <div class="chips"><span class="chip chip-qual">Ordinal</span><span class="chip chip-time">Time Series</span></div>
+        </div>
+      </div>
+
+      <!-- TREEMAP -->
+      <div class="viz-card" data-cats="distribution comparison">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <rect x="10" y="10" width="90" height="70" rx="2" fill="#47c8ff" opacity="0.2" stroke="#47c8ff" stroke-width="1"/>
+            <text x="55" y="50" fill="#47c8ff" font-size="9" text-anchor="middle">Software Eng</text>
+            <text x="55" y="62" fill="#47c8ff" font-size="8" text-anchor="middle" opacity="0.7">42%</text>
+
+            <rect x="102" y="10" width="55" height="45" rx="2" fill="#e8ff47" opacity="0.15" stroke="#e8ff47" stroke-width="1"/>
+            <text x="129" y="35" fill="#e8ff47" font-size="8" text-anchor="middle">Data Sci</text>
+            <text x="129" y="46" fill="#e8ff47" font-size="7" text-anchor="middle" opacity="0.7">21%</text>
+
+            <rect x="102" y="57" width="55" height="23" rx="2" fill="#b47fff" opacity="0.2" stroke="#b47fff" stroke-width="1"/>
+            <text x="129" y="71" fill="#b47fff" font-size="8" text-anchor="middle">ML / AI</text>
+
+            <rect x="159" y="10" width="51" height="38" rx="2" fill="#47ffb4" opacity="0.15" stroke="#47ffb4" stroke-width="1"/>
+            <text x="184" y="32" fill="#47ffb4" font-size="8" text-anchor="middle">DevOps</text>
+
+            <rect x="159" y="50" width="51" height="30" rx="2" fill="#ff6b6b" opacity="0.15" stroke="#ff6b6b" stroke-width="1"/>
+            <text x="184" y="67" fill="#ff6b6b" font-size="8" text-anchor="middle">Product</text>
+
+            <rect x="10" y="82" width="200" height="28" rx="2" fill="#252a35" stroke="#252a35" stroke-width="1"/>
+            <text x="110" y="100" fill="#6b7280" font-size="8" text-anchor="middle">Other roles (16% combined)</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Treemap</div>
+          <div class="viz-info-desc">Shows proportional distribution of job categories by area. Instantly communicates market composition and relative size of each role cluster.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Job market breakdown by category, platform composition, skill demand share.</div>
+          <div class="chips"><span class="chip chip-quant">Quantitative</span><span class="chip chip-nom">Nominal</span></div>
+        </div>
+      </div>
+
+      <!-- STREAM GRAPH -->
+      <div class="viz-card" data-cats="change flow distribution">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <path d="M10,60 C40,58 60,40 90,35 C120,30 140,28 170,25 C190,23 200,22 210,22 L210,40 C200,38 190,37 170,38 C140,40 120,42 90,48 C60,54 40,60 10,62 Z" fill="#47c8ff" opacity="0.3"/>
+            <path d="M10,62 C40,60 60,55 90,50 C120,45 140,44 170,42 C190,41 200,40 210,40 L210,55 C200,53 190,52 170,50 C140,48 120,47 90,55 C60,63 40,65 10,70 Z" fill="#e8ff47" opacity="0.25"/>
+            <path d="M10,70 C40,68 60,68 90,70 C120,72 140,72 170,70 C190,69 200,68 210,68 L210,85 C200,83 190,82 170,80 C140,78 120,78 90,80 C60,82 40,80 10,80 Z" fill="#b47fff" opacity="0.3"/>
+            <path d="M10,80 C40,78 60,76 90,78 C120,80 140,82 170,85 C190,87 200,88 210,88 L210,100 C200,100 190,100 170,100 C140,100 120,100 90,100 C60,100 40,100 10,100 Z" fill="#47ffb4" opacity="0.2"/>
+            <text x="15" y="33" fill="#47c8ff" font-size="8" opacity="0.9">Software Eng ↑</text>
+            <text x="15" y="66" fill="#e8ff47" font-size="8" opacity="0.9">Data / AI ↑↑</text>
+            <text x="15" y="78" fill="#b47fff" font-size="8" opacity="0.8">Product ↔</text>
+            <text x="15" y="95" fill="#47ffb4" font-size="8" opacity="0.7">Other ↓</text>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Stream Graph</div>
+          <div class="viz-info-desc">An organic, flowing area chart showing how multiple role categories evolve in volume simultaneously. Good for showing market composition shift.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Category-level job market shifts over time. Shows rise of AI roles visually overtaking legacy roles.</div>
+          <div class="chips"><span class="chip chip-time">Time Series</span><span class="chip chip-quant">Continuous</span></div>
+        </div>
+      </div>
+
+      <!-- NETWORK GRAPH -->
+      <div class="viz-card" data-cats="relationship">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <!-- edges -->
+            <line x1="110" y1="60" x2="60" y2="30" stroke="#252a35" stroke-width="1.5"/>
+            <line x1="110" y1="60" x2="160" y2="30" stroke="#252a35" stroke-width="1.5"/>
+            <line x1="110" y1="60" x2="50" y2="85" stroke="#252a35" stroke-width="1.5"/>
+            <line x1="110" y1="60" x2="165" y2="90" stroke="#252a35" stroke-width="1.5"/>
+            <line x1="110" y1="60" x2="110" y2="105" stroke="#252a35" stroke-width="1.5"/>
+            <line x1="60" y1="30" x2="30" y2="55" stroke="#252a35" stroke-width="1"/>
+            <line x1="160" y1="30" x2="195" y2="50" stroke="#252a35" stroke-width="1"/>
+            <!-- nodes -->
+            <circle cx="110" cy="60" r="14" fill="#47c8ff" opacity="0.2" stroke="#47c8ff" stroke-width="1.5"/>
+            <text x="110" y="64" fill="#47c8ff" font-size="8" text-anchor="middle">ML Eng</text>
+            <circle cx="60" cy="30" r="9" fill="#e8ff47" opacity="0.15" stroke="#e8ff47" stroke-width="1"/>
+            <text x="60" y="34" fill="#e8ff47" font-size="7" text-anchor="middle">AI Eng</text>
+            <circle cx="160" cy="30" r="9" fill="#b47fff" opacity="0.15" stroke="#b47fff" stroke-width="1"/>
+            <text x="160" y="34" fill="#b47fff" font-size="7" text-anchor="middle">Data Sci</text>
+            <circle cx="50" cy="85" r="7" fill="#47ffb4" opacity="0.15" stroke="#47ffb4" stroke-width="1"/>
+            <text x="50" y="89" fill="#47ffb4" font-size="6" text-anchor="middle">LLMOps</text>
+            <circle cx="165" cy="90" r="7" fill="#ff6b6b" opacity="0.15" stroke="#ff6b6b" stroke-width="1"/>
+            <text x="165" y="94" fill="#ff6b6b" font-size="6" text-anchor="middle">MLflow</text>
+            <circle cx="110" cy="105" r="7" fill="#47c8ff" opacity="0.1" stroke="#47c8ff" stroke-width="1"/>
+            <text x="110" y="109" fill="#47c8ff" font-size="6" text-anchor="middle">Analyst</text>
+            <circle cx="30" cy="55" r="5" fill="#6b7280" opacity="0.5" stroke="#6b7280" stroke-width="1"/>
+            <circle cx="195" cy="50" r="5" fill="#6b7280" opacity="0.5" stroke="#6b7280" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Network / Force Graph</div>
+          <div class="viz-info-desc">Shows how job roles connect through shared skills. Roles that share many skills cluster together. Reveals hidden similarities between different-named roles.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> Role similarity detection — showing "ML Engineer" and "AI Engineer" are functionally the same.</div>
+          <div class="chips"><span class="chip chip-qual">Qualitative</span><span class="chip chip-time">Relationship</span></div>
+        </div>
+      </div>
+
+      <!-- SCATTER PLOT -->
+      <div class="viz-card" data-cats="distribution comparison">
+        <div class="viz-preview">
+          <svg width="220" height="120" viewBox="0 0 220 120">
+            <line x1="25" y1="10" x2="25" y2="105" stroke="#252a35" stroke-width="1"/>
+            <line x1="25" y1="105" x2="210" y2="105" stroke="#252a35" stroke-width="1"/>
+            <text x="12" y="110" fill="#6b7280" font-size="7">low</text>
+            <text x="200" y="113" fill="#6b7280" font-size="7">high</text>
+            <text x="8" y="60" fill="#6b7280" font-size="7" transform="rotate(-90,8,60)">growth</text>
+            <text x="100" y="115" fill="#6b7280" font-size="7" text-anchor="middle">← volume →</text>
+            <!-- dots -->
+            <circle cx="180" cy="20" r="12" fill="#e8ff47" opacity="0.4"/>
+            <text x="180" y="23" fill="#e8ff47" font-size="7" text-anchor="middle">AI Eng</text>
+            <circle cx="140" cy="35" r="9" fill="#47ffb4" opacity="0.35"/>
+            <text x="140" y="38" fill="#47ffb4" font-size="6" text-anchor="middle">LLMOps</text>
+            <circle cx="80" cy="60" r="14" fill="#47c8ff" opacity="0.3"/>
+            <text x="80" y="63" fill="#47c8ff" font-size="7" text-anchor="middle">Data Sci</text>
+            <circle cx="120" cy="75" r="11" fill="#b47fff" opacity="0.3"/>
+            <text x="120" y="78" fill="#b47fff" font-size="6" text-anchor="middle">DevOps</text>
+            <circle cx="50" cy="85" r="8" fill="#ff6b6b" opacity="0.3"/>
+            <text x="50" y="88" fill="#ff6b6b" font-size="6" text-anchor="middle">PMgr</text>
+            <circle cx="170" cy="90" r="6" fill="#6b7280" opacity="0.4"/>
+            <circle cx="90" cy="40" r="5" fill="#6b7280" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="viz-info">
+          <div class="viz-info-title">Bubble / Scatter Plot</div>
+          <div class="viz-info-desc">Maps roles by two axes (e.g. volume vs. growth rate), with bubble size as a third variable (e.g. median salary). Great for quadrant analysis.</div>
+          <div class="viz-best-for"><strong>Best for:</strong> "High growth, low volume" emerging roles vs "high volume, stable" mature roles quadrant view.</div>
+          <div class="chips"><span class="chip chip-quant">Continuous</span><span class="chip chip-quant">Quantitative</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======== TAB 3: COMPONENT MOCKUPS ======== -->
+  <div id="mockups" class="tab-content">
+    <div class="section-label">Step 3 — Wireframe Components</div>
+    <div class="section-title">Interactive Component Mockups</div>
+    <div class="section-desc">Ready-to-reference component patterns for your wireframes, designed specifically for job market data. These show how the viz patterns apply to your data.</div>
+
+    <!-- RANKED LIST -->
+    <div class="mockup-section">
+      <h3>Skill & Role Demand — Ranked List with Movement</h3>
+      <p>Shows the top skills or roles ranked by posting volume, with delta indicators showing week-over-week change. NEW badge for first appearances.</p>
+      <div style="max-width: 560px;">
+        <div style="display:flex;align-items:center;gap:14px;padding:8px 16px;margin-bottom:8px;border-bottom:1px solid var(--border);">
+          <span style="width:28px;font-size:10px;color:var(--text-muted);text-align:center;">#</span>
+          <span style="width:32px;font-size:10px;color:var(--text-muted);">Δ</span>
+          <span style="flex:1;font-size:10px;color:var(--text-muted);">Role / Skill</span>
+          <span style="width:120px;font-size:10px;color:var(--text-muted);">Volume</span>
+          <span style="width:60px;font-size:10px;color:var(--text-muted);text-align:right;">Postings</span>
+          <span style="width:50px;font-size:10px;color:var(--text-muted);">30d</span>
+        </div>
+        <div class="ranked-list" id="ranked-list">
+          <div class="rank-item deletable" style="position:relative">
+            <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+            <span class="rank-num">1</span>
+            <span class="rank-delta up">▲3</span>
+            <span class="rank-name" data-editable contenteditable="false">AI / ML Engineer</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:92%"></div></div>
+            <span class="rank-count" data-editable contenteditable="false">18,432</span>
+            <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+              <polyline points="0,18 10,14 20,12 30,8 40,5 50,3" fill="none" stroke="#47ffb4" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="rank-item deletable" style="position:relative">
+            <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+            <span class="rank-num">2</span>
+            <span class="rank-delta new">★NEW</span>
+            <span class="rank-name" data-editable contenteditable="false">LLM Operations Engineer</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:78%; background: var(--accent1)"></div></div>
+            <span class="rank-count" data-editable contenteditable="false">14,201</span>
+            <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+              <polyline points="0,20 10,19 20,17 30,12 40,7 50,2" fill="none" stroke="#e8ff47" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="rank-item deletable" style="position:relative">
+            <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+            <span class="rank-num">3</span>
+            <span class="rank-delta up">▲1</span>
+            <span class="rank-name" data-editable contenteditable="false">Prompt Engineer</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:65%"></div></div>
+            <span class="rank-count" data-editable contenteditable="false">11,890</span>
+            <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+              <polyline points="0,16 10,13 20,11 30,9 40,8 50,6" fill="none" stroke="#47ffb4" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="rank-item deletable" style="position:relative">
+            <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+            <span class="rank-num">4</span>
+            <span class="rank-delta" style="color:var(--text-muted)">—</span>
+            <span class="rank-name" data-editable contenteditable="false">Data Scientist</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:55%"></div></div>
+            <span class="rank-count" data-editable contenteditable="false">9,320</span>
+            <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+              <polyline points="0,10 10,10 20,11 30,10 40,10 50,10" fill="none" stroke="#6b7280" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="rank-item deletable" style="position:relative">
+            <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+            <span class="rank-num">5</span>
+            <span class="rank-delta down">▼3</span>
+            <span class="rank-name" data-editable contenteditable="false">Business Intelligence Analyst</span>
+            <div class="rank-bar-wrap"><div class="rank-bar" style="width:40%; background: var(--accent3)"></div></div>
+            <span class="rank-count" data-editable contenteditable="false">6,104</span>
+            <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+              <polyline points="0,4 10,6 20,9 30,12 40,15 50,17" fill="none" stroke="#ff6b6b" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+        <button class="add-row-btn" onclick="openAddModal('rank')">+ Add Role</button>
+      </div>
+      <div class="note-box">
+        <strong>UX note:</strong> Each row is clickable to drill into that role. The sparkline gives a 30-day trend glance without requiring the user to navigate away. Delta colors (green = rising, red = falling, yellow = new) are immediately scannable. Consider also showing a "% change" tooltip on hover for power users.
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- EMERGING ROLES GRID -->
+    <div class="mockup-section">
+      <h3>Emerging Roles Dashboard</h3>
+      <p>Cards highlighting newly appearing or fast-growing AI/tech roles. Color-coded by status — useful for the "new & changing roles" use case.</p>
+      <div class="emerging-grid" id="emerging-grid">
+        <div class="emerging-card hot deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+          <div class="emerging-label" data-editable contenteditable="false">🔥 Fastest Growing</div>
+          <div class="emerging-title" data-editable contenteditable="false">AI Safety Researcher</div>
+          <div class="emerging-growth" style="color:var(--accent3)" data-editable contenteditable="false">+284%</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;" data-editable contenteditable="false">vs. last year</div>
+          <div class="emerging-platforms">
+            <div class="platform-dot" style="background:#47c8ff" title="LinkedIn"></div>
+            <div class="platform-dot" style="background:#e8ff47" title="Indeed"></div>
+            <div class="platform-dot" style="background:#b47fff" title="Glassdoor"></div>
+          </div>
+        </div>
+        <div class="emerging-card new deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+          <div class="emerging-label" data-editable contenteditable="false">★ New Role</div>
+          <div class="emerging-title" data-editable contenteditable="false">LLM Ops Engineer</div>
+          <div class="emerging-growth" style="color:var(--accent1)" data-editable contenteditable="false">First seen</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;" data-editable contenteditable="false">6 months ago</div>
+          <div class="emerging-platforms">
+            <div class="platform-dot" style="background:#47c8ff"></div>
+            <div class="platform-dot" style="background:#e8ff47"></div>
+          </div>
+        </div>
+        <div class="emerging-card rising deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+          <div class="emerging-label" data-editable contenteditable="false">↑ Rising Fast</div>
+          <div class="emerging-title" data-editable contenteditable="false">Agentic AI Developer</div>
+          <div class="emerging-growth" style="color:var(--accent5)" data-editable contenteditable="false">+167%</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;" data-editable contenteditable="false">last 90 days</div>
+          <div class="emerging-platforms">
+            <div class="platform-dot" style="background:#47c8ff"></div>
+            <div class="platform-dot" style="background:#47ffb4"></div>
+          </div>
+        </div>
+        <div class="emerging-card shifting deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+          <div class="emerging-label" data-editable contenteditable="false">⇄ Name Shifting</div>
+          <div class="emerging-title" data-editable contenteditable="false">AI Product Manager</div>
+          <div class="emerging-growth" style="color:var(--accent2)" data-editable contenteditable="false">≈ PM + AI</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;" data-editable contenteditable="false">alias cluster</div>
+          <div class="emerging-platforms">
+            <div class="platform-dot" style="background:#47c8ff"></div>
+            <div class="platform-dot" style="background:#e8ff47"></div>
+            <div class="platform-dot" style="background:#b47fff"></div>
+            <div class="platform-dot" style="background:#47ffb4"></div>
+          </div>
+        </div>
+      </div>
+      <button class="add-row-btn" onclick="openAddModal('emerging')">+ Add Emerging Role</button>
+    </div>
+
+    <hr class="divider">
+
+    <!-- SANKEY ROLE EVOLUTION -->
+    <div class="mockup-section">
+      <h3>Role Evolution — Sankey / Alluvial View</h3>
+      <p>Shows how job titles have shifted and renamed over time. Useful for tracking how "Data Analyst" is evolving into more specialized roles.</p>
+      <div class="sankey-wrap">
+        <svg width="100%" height="200" viewBox="0 0 700 200">
+          <!-- Left: 2022 -->
+          <text x="60" y="15" fill="#6b7280" font-size="10" text-anchor="middle">2022</text>
+          <rect x="10" y="22" width="100" height="55" rx="3" fill="#47c8ff" opacity="0.2" stroke="#47c8ff" stroke-width="1"/>
+          <text x="60" y="52" fill="#47c8ff" font-size="10" text-anchor="middle">Data Analyst</text>
+          <text x="60" y="65" fill="#47c8ff" font-size="9" text-anchor="middle" opacity="0.7">12,400 roles</text>
+
+          <rect x="10" y="82" width="100" height="40" rx="3" fill="#b47fff" opacity="0.2" stroke="#b47fff" stroke-width="1"/>
+          <text x="60" y="106" fill="#b47fff" font-size="10" text-anchor="middle">Data Scientist</text>
+
+          <rect x="10" y="127" width="100" height="35" rx="3" fill="#6b7280" opacity="0.2" stroke="#6b7280" stroke-width="1"/>
+          <text x="60" y="149" fill="#6b7280" font-size="10" text-anchor="middle">ML Engineer</text>
+
+          <!-- Middle: 2024 -->
+          <text x="350" y="15" fill="#6b7280" font-size="10" text-anchor="middle">2024</text>
+          <rect x="300" y="22" width="100" height="30" rx="3" fill="#47c8ff" opacity="0.2" stroke="#47c8ff" stroke-width="1"/>
+          <text x="350" y="41" fill="#47c8ff" font-size="9" text-anchor="middle">Analytics Eng</text>
+
+          <rect x="300" y="57" width="100" height="35" rx="3" fill="#e8ff47" opacity="0.15" stroke="#e8ff47" stroke-width="1"/>
+          <text x="350" y="78" fill="#e8ff47" font-size="9" text-anchor="middle">Data Eng (AI)</text>
+
+          <rect x="300" y="97" width="100" height="30" rx="3" fill="#b47fff" opacity="0.2" stroke="#b47fff" stroke-width="1"/>
+          <text x="350" y="116" fill="#b47fff" font-size="9" text-anchor="middle">ML Scientist</text>
+
+          <rect x="300" y="132" width="100" height="35" rx="3" fill="#47ffb4" opacity="0.15" stroke="#47ffb4" stroke-width="1"/>
+          <text x="350" y="153" fill="#47ffb4" font-size="9" text-anchor="middle">AI Engineer</text>
+
+          <!-- Right: 2026 -->
+          <text x="630" y="15" fill="#6b7280" font-size="10" text-anchor="middle">2026</text>
+          <rect x="590" y="22" width="100" height="28" rx="3" fill="#e8ff47" opacity="0.15" stroke="#e8ff47" stroke-width="1"/>
+          <text x="640" y="40" fill="#e8ff47" font-size="9" text-anchor="middle">LLM Engineer</text>
+
+          <rect x="590" y="55" width="100" height="28" rx="3" fill="#47ffb4" opacity="0.15" stroke="#47ffb4" stroke-width="1"/>
+          <text x="640" y="73" fill="#47ffb4" font-size="9" text-anchor="middle">AI Infra Eng</text>
+
+          <rect x="590" y="88" width="100" height="28" rx="3" fill="#b47fff" opacity="0.2" stroke="#b47fff" stroke-width="1"/>
+          <text x="640" y="106" fill="#b47fff" font-size="9" text-anchor="middle">AI Safety Eng</text>
+
+          <rect x="590" y="121" width="100" height="25" rx="3" fill="#47c8ff" opacity="0.2" stroke="#47c8ff" stroke-width="1"/>
+          <text x="640" y="137" fill="#47c8ff" font-size="9" text-anchor="middle">Prompt Eng</text>
+
+          <rect x="590" y="150" width="100" height="25" rx="3" fill="#ff6b6b" opacity="0.15" stroke="#ff6b6b" stroke-width="1"/>
+          <text x="640" y="166" fill="#ff6b6b" font-size="9" text-anchor="middle">Agentic Dev</text>
+
+          <!-- FLOW PATHS (simplified) -->
+          <path d="M110,40 C200,40 200,37 300,37" fill="none" stroke="#47c8ff" stroke-width="8" opacity="0.15"/>
+          <path d="M110,55 C200,55 200,68 300,68" fill="none" stroke="#47c8ff" stroke-width="12" opacity="0.12"/>
+          <path d="M110,95 C200,95 200,108 300,108" fill="none" stroke="#b47fff" stroke-width="6" opacity="0.15"/>
+          <path d="M110,145 C200,145 200,145 300,148" fill="none" stroke="#6b7280" stroke-width="10" opacity="0.12"/>
+          <path d="M400,37 C490,37 490,35 590,35" fill="none" stroke="#e8ff47" stroke-width="6" opacity="0.15"/>
+          <path d="M400,68 C490,68 490,65 590,68" fill="none" stroke="#47ffb4" stroke-width="8" opacity="0.15"/>
+          <path d="M400,110 C490,110 490,100 590,100" fill="none" stroke="#b47fff" stroke-width="5" opacity="0.15"/>
+          <path d="M400,148 C490,148 490,133 590,133" fill="none" stroke="#47c8ff" stroke-width="7" opacity="0.12"/>
+          <path d="M400,68 C490,68 490,163 590,163" fill="none" stroke="#ff6b6b" stroke-width="4" opacity="0.15"/>
+        </svg>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">Flow width represents relative volume of roles. Branching shows specialization. Merging shows consolidation.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======== TAB 4: ROLE SIMILARITY ======== -->
+  <div id="roles" class="tab-content">
+    <div class="section-label">Special Use Case</div>
+    <div class="section-title">Detecting Role Similarity & Aliases</div>
+    <div class="section-desc">A core feature of your platform — identifying when different job titles are essentially the same role. Here are visualization patterns for this specific problem.</div>
+
+    <div class="similarity-panel">
+      <div class="sim-cluster">
+        <div class="sim-cluster-title">
+          <span style="color:var(--accent2)">◉</span>
+          <span data-editable contenteditable="false">"AI Engineer" Cluster</span>
+          <span class="sim-canonical">canonical</span>
+        </div>
+        <div style="font-size:11px; color:var(--text-dim); margin-bottom:16px;" data-editable contenteditable="false">These titles share 70%+ of required skills across job listings</div>
+        <div id="sim-cluster-1">
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" style="color:var(--accent2); font-weight:600;" data-editable contenteditable="false">AI Engineer <span class="sim-canonical">canonical</span></span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:100%; background:var(--accent2)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">100%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Machine Learning Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:91%; background:var(--accent5)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">91%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Applied AI Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:88%; background:var(--accent5)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">88%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Deep Learning Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:82%; background:var(--accent5)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">82%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">AI Solutions Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:74%; background:var(--accent1)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">74%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Generative AI Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:71%; background:var(--accent1)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">71%</span>
+        </div>
+        </div>
+        <button class="add-row-btn" onclick="openAddModal('sim', 'sim-cluster-1')">+ Add Role to Cluster</button>
+      </div>
+
+      <div class="sim-cluster">
+        <div class="sim-cluster-title">
+          <span style="color:var(--accent4)">◉</span>
+          <span data-editable contenteditable="false">"Data Scientist" Cluster</span>
+          <span class="sim-canonical" style="background:rgba(180,127,255,0.1); border-color:rgba(180,127,255,0.2); color:var(--accent4)">canonical</span>
+        </div>
+        <div style="font-size:11px; color:var(--text-dim); margin-bottom:16px;" data-editable contenteditable="false">Titles that appear under different names but require the same core skills</div>
+        <div id="sim-cluster-2">
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" style="color:var(--accent4); font-weight:600;" data-editable contenteditable="false">Data Scientist <span class="sim-canonical" style="background:rgba(180,127,255,0.1); border-color:rgba(180,127,255,0.2); color:var(--accent4)">canonical</span></span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:100%; background:var(--accent4)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">100%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Quantitative Analyst (Tech)</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:86%; background:var(--accent5)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">86%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Research Scientist (ML)</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:84%; background:var(--accent5)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">84%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">AI/ML Researcher</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:79%; background:var(--accent1)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">79%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Decision Scientist</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:73%; background:var(--accent1)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">73%</span>
+        </div>
+        <div class="sim-role deletable" style="position:relative">
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="false">Insights Engineer</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:70%; background:var(--accent1)"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="false">70%</span>
+        </div>
+        </div>
+        <button class="add-row-btn" onclick="openAddModal('sim', 'sim-cluster-2')">+ Add Role to Cluster</button>
+      </div>
+    </div>
+
+    <div class="note-box" style="margin-top:20px; margin-bottom:32px;">
+      <strong>Visualization recommendation:</strong> For role similarity, combine a <strong>Similarity Score Bar</strong> (shown above) with a <strong>Venn Diagram</strong> for skill overlap, and a <strong>Network Graph</strong> for seeing all clusters simultaneously. The bar view works well for detail; the network view works for discovery.
+    </div>
+
+    <div class="section-title" style="margin-bottom:6px; font-size:16px;">Recommended Visualization Stack</div>
+    <div class="section-desc">For your specific platform goals, here's the recommended visualization combination:</div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title" style="color:var(--accent1)">📈 Trend Detection</div>
+        <div class="card-subtitle">For sudden spikes or drops in role demand</div>
+        <div style="font-size:12px; color:var(--text-dim); line-height:1.7">
+          <strong style="color:var(--text)">Line Chart + Threshold Lines</strong><br>
+          Set configurable thresholds (e.g. 2x avg). Highlight anomalies in color. Include annotation overlays for context (layoffs, product launches).
+        </div>
+        <div class="chips" style="margin-top:12px"><span class="chip chip-time">Continuous</span><span class="chip chip-quant">Quantitative</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--accent2)">🔀 Role Shifting</div>
+        <div class="card-subtitle">For role evolution and title changes over time</div>
+        <div style="font-size:12px; color:var(--text-dim); line-height:1.7">
+          <strong style="color:var(--text)">Sankey / Alluvial Diagram</strong><br>
+          Map how old titles split into new ones. Flow width = volume. Great for showing "Data Analyst → Analytics Engineer → Data + AI Engineer."
+        </div>
+        <div class="chips" style="margin-top:12px"><span class="chip chip-qual">Qualitative</span><span class="chip chip-time">Flow</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--accent5)">🔗 Role Aliases</div>
+        <div class="card-subtitle">For identifying same-role, different-name patterns</div>
+        <div style="font-size:12px; color:var(--text-dim); line-height:1.7">
+          <strong style="color:var(--text)">Network Graph + Similarity Bars</strong><br>
+          Network for discovery, bars for detail. Link titles by shared skill %. Canonical title = highest volume in cluster.
+        </div>
+        <div class="chips" style="margin-top:12px"><span class="chip chip-qual">Qualitative</span><span class="chip chip-time">Relationship</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // ======= TAB NAVIGATION =======
+  function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function filterViz(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.viz-card').forEach(card => {
+      if (cat === 'all') {
+        card.style.display = '';
+      } else {
+        const cats = card.dataset.cats || '';
+        card.style.display = cats.includes(cat) ? '' : 'none';
+      }
+    });
+  }
+
+  // ======= EDIT MODE =======
+  let editMode = false;
+
+  function toggleEditMode() {
+    editMode = !editMode;
+    document.body.classList.toggle('edit-mode', editMode);
+    const btn = document.getElementById('toggle-edit-btn');
+    btn.textContent = editMode ? '✓ Done Editing' : '✎ Edit';
+    btn.style.background = editMode ? '#47ffb4' : '';
+    btn.style.borderColor = editMode ? '#47ffb4' : '';
+    btn.style.color = editMode ? '#0a0b0f' : '';
+
+    // Show/hide extra buttons
+    ['export-btn','import-btn-show','reset-btn'].forEach(id => {
+      document.getElementById(id).style.display = editMode ? 'block' : 'none';
+    });
+
+    // Toggle contenteditable on all editable elements
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      el.contentEditable = editMode ? 'true' : 'false';
+    });
+  }
+
+  function deleteRow(btn) {
+    if (!editMode) return;
+    const row = btn.closest('.deletable');
+    if (row) row.remove();
+    renumberRankList();
+  }
+
+  function renumberRankList() {
+    document.querySelectorAll('#ranked-list .rank-item').forEach((item, i) => {
+      const num = item.querySelector('.rank-num');
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  // ======= MODAL =======
+  let modalContext = null;
+  let modalTarget = null;
+
+  function openAddModal(type, targetId) {
+    if (!editMode) return;
+    modalContext = type;
+    modalTarget = targetId || null;
+    const modal = document.getElementById('add-modal');
+    const fields = document.getElementById('modal-fields');
+    const title = document.getElementById('modal-title');
+
+    if (type === 'rank') {
+      title.textContent = 'Add Role to Ranked List';
+      fields.innerHTML = `
+        <div class="modal-field"><label>Role Name</label><input id="mf-name" placeholder="e.g. AI Product Manager"/></div>
+        <div class="modal-field"><label>Posting Count</label><input id="mf-count" placeholder="e.g. 5,200"/></div>
+        <div class="modal-field"><label>Trend</label>
+          <select id="mf-trend">
+            <option value="up">▲ Rising</option>
+            <option value="down">▼ Falling</option>
+            <option value="new">★ New</option>
+            <option value="flat">— Flat</option>
+          </select>
+        </div>
+        <div class="modal-field"><label>Delta Label</label><input id="mf-delta" placeholder="e.g. ▲2 or NEW"/></div>
+        <div class="modal-field"><label>Bar Width (0–100)</label><input id="mf-bar" type="number" min="0" max="100" placeholder="e.g. 60"/></div>
+      `;
+    } else if (type === 'emerging') {
+      title.textContent = 'Add Emerging Role Card';
+      fields.innerHTML = `
+        <div class="modal-field"><label>Label / Status</label><input id="mf-label" placeholder="e.g. 🔥 Fastest Growing"/></div>
+        <div class="modal-field"><label>Role Title</label><input id="mf-title" placeholder="e.g. AI Safety Researcher"/></div>
+        <div class="modal-field"><label>Growth / Metric</label><input id="mf-growth" placeholder="e.g. +284%"/></div>
+        <div class="modal-field"><label>Subtitle</label><input id="mf-sub" placeholder="e.g. vs. last year"/></div>
+        <div class="modal-field"><label>Card Color Style</label>
+          <select id="mf-style">
+            <option value="hot">🔴 Hot (red)</option>
+            <option value="rising">🟢 Rising (green)</option>
+            <option value="new">🟡 New (yellow)</option>
+            <option value="shifting">🔵 Shifting (blue)</option>
+          </select>
+        </div>
+      `;
+    } else if (type === 'sim') {
+      title.textContent = 'Add Role to Cluster';
+      fields.innerHTML = `
+        <div class="modal-field"><label>Role Name</label><input id="mf-name" placeholder="e.g. NLP Engineer"/></div>
+        <div class="modal-field"><label>Similarity %</label><input id="mf-pct" type="number" min="0" max="100" placeholder="e.g. 78"/></div>
+      `;
+    }
+
+    modal.classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('add-modal').classList.remove('open');
+    modalContext = null;
+    modalTarget = null;
+  }
+
+  function submitModal() {
+    if (modalContext === 'rank') {
+      const name = document.getElementById('mf-name').value || 'New Role';
+      const count = document.getElementById('mf-count').value || '0';
+      const trend = document.getElementById('mf-trend').value;
+      const delta = document.getElementById('mf-delta').value || '—';
+      const bar = Math.min(100, Math.max(0, parseInt(document.getElementById('mf-bar').value) || 50));
+      const trendColors = { up: '#47ffb4', down: '#ff6b6b', new: '#e8ff47', flat: '#6b7280' };
+      const deltaColors = { up: 'up', down: 'down', new: 'new', flat: '' };
+      const list = document.getElementById('ranked-list');
+      const div = document.createElement('div');
+      div.className = 'rank-item deletable';
+      div.style.position = 'relative';
+      const n = list.querySelectorAll('.rank-item').length + 1;
+      div.innerHTML = `
+        <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+        <span class="rank-num">${n}</span>
+        <span class="rank-delta ${deltaColors[trend]}">${delta}</span>
+        <span class="rank-name" data-editable contenteditable="true">${name}</span>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${bar}%"></div></div>
+        <span class="rank-count" data-editable contenteditable="true">${count}</span>
+        <svg class="rank-trend sparkline" width="50" height="20" viewBox="0 0 50 20">
+          <polyline points="0,15 25,10 50,10" fill="none" stroke="${trendColors[trend]}" stroke-width="1.5"/>
+        </svg>
+      `;
+      list.appendChild(div);
+
+    } else if (modalContext === 'emerging') {
+      const label = document.getElementById('mf-label').value || '★ New';
+      const title = document.getElementById('mf-title').value || 'New Role';
+      const growth = document.getElementById('mf-growth').value || '—';
+      const sub = document.getElementById('mf-sub').value || '';
+      const style = document.getElementById('mf-style').value;
+      const growthColors = { hot: 'var(--accent3)', rising: 'var(--accent5)', new: 'var(--accent1)', shifting: 'var(--accent2)' };
+      const grid = document.getElementById('emerging-grid');
+      const div = document.createElement('div');
+      div.className = `emerging-card ${style} deletable`;
+      div.style.position = 'relative';
+      div.innerHTML = `
+        <button class="delete-btn" onclick="deleteRow(this)">✕ remove</button>
+        <div class="emerging-label" data-editable contenteditable="true">${label}</div>
+        <div class="emerging-title" data-editable contenteditable="true">${title}</div>
+        <div class="emerging-growth" style="color:${growthColors[style]}" data-editable contenteditable="true">${growth}</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;" data-editable contenteditable="true">${sub}</div>
+        <div class="emerging-platforms"><div class="platform-dot" style="background:#47c8ff"></div></div>
+      `;
+      grid.appendChild(div);
+
+    } else if (modalContext === 'sim') {
+      const name = document.getElementById('mf-name').value || 'New Role';
+      const pct = Math.min(100, Math.max(0, parseInt(document.getElementById('mf-pct').value) || 70));
+      const barColor = pct >= 85 ? 'var(--accent5)' : 'var(--accent1)';
+      const container = document.getElementById(modalTarget);
+      if (container) {
+        const div = document.createElement('div');
+        div.className = 'sim-role deletable';
+        div.style.position = 'relative';
+        div.innerHTML = `
+          <button class="delete-btn" onclick="deleteRow(this)">✕</button>
+          <span class="sim-role-name" data-editable contenteditable="true">${name}</span>
+          <div class="sim-score-bar"><div class="sim-score-fill" style="width:${pct}%; background:${barColor}"></div></div>
+          <span class="sim-score-val" data-editable contenteditable="true">${pct}%</span>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    closeModal();
+  }
+
+  // ======= EXPORT / IMPORT =======
+  function exportJSON() {
+    const data = {
+      title: document.querySelector('.header-left h2')?.innerText,
+      rankedList: [],
+      emergingRoles: [],
+      simCluster1: [],
+      simCluster2: [],
+      exportedAt: new Date().toISOString()
+    };
+
+    document.querySelectorAll('#ranked-list .rank-item').forEach(item => {
+      data.rankedList.push({
+        name: item.querySelector('.rank-name')?.innerText,
+        count: item.querySelector('.rank-count')?.innerText,
+        delta: item.querySelector('.rank-delta')?.innerText
+      });
+    });
+
+    document.querySelectorAll('#emerging-grid .emerging-card').forEach(card => {
+      data.emergingRoles.push({
+        label: card.querySelector('.emerging-label')?.innerText,
+        title: card.querySelector('.emerging-title')?.innerText,
+        growth: card.querySelector('.emerging-growth')?.innerText
+      });
+    });
+
+    document.querySelectorAll('#sim-cluster-1 .sim-role').forEach(row => {
+      data.simCluster1.push({
+        name: row.querySelector('.sim-role-name')?.innerText,
+        score: row.querySelector('.sim-score-val')?.innerText
+      });
+    });
+
+    document.querySelectorAll('#sim-cluster-2 .sim-role').forEach(row => {
+      data.simCluster2.push({
+        name: row.querySelector('.sim-role-name')?.innerText,
+        score: row.querySelector('.sim-score-val')?.innerText
+      });
+    });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dashboard-data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        alert('Import loaded! In a full implementation, this would restore all saved dashboard data from your JSON file.');
+      } catch {
+        alert('Invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function resetAll() {
+    if (confirm('Reset all content to original? This cannot be undone.')) {
+      location.reload();
+    }
+  }
+
+  // Close modal on backdrop click
+  document.getElementById('add-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Enter key submits modal
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
